@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Love.💕</title>
+  <title>My Love. 💕</title>
   <style>
     * {
       margin: 0;
@@ -22,32 +22,100 @@
     canvas {
       display: block;
     }
+
+    /* 🎵 BOTÓN DE INICIO PARA ACTIVAR MÚSICA EN EL CELULAR */
+    .pantalla-inicio {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      transition: opacity 0.8s ease;
+    }
+
+    .btn-reproducir {
+      background-color: #ff94b4;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: 3px solid #ffffff;
+      padding: 15px 30px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255, 148, 180, 0.8);
+      animation: pulso 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulso {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* 🌸 CONTENEDOR DE LOS VERSOS EN EL CENTRO DEL CORAZÓN */
     .texto-centro {
       position: absolute;
       color: #ffffff;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       text-align: center;
-      text-shadow: 0 0 10px rgba(255, 105, 180, 0.8), 0 0 20px rgba(255, 182, 193, 0.6);
+      text-shadow: 0 0 10px rgba(255, 105, 180, 0.9), 0 0 20px rgba(255, 182, 193, 0.7);
       pointer-events: none;
+      padding: 0 25px;
+      line-height: 1.4;
+      transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
       opacity: 0;
-      transition: opacity 2s ease-in-out;
-      padding: 0 20px;
+      transform: scale(0.95);
+    }
+
+    .texto-centro.visible {
+      opacity: 1;
+      transform: scale(1);
     }
   </style>
 </head>
 <body>
 
+  <!-- 🎵 AUDIO -->
+  <audio id="musicaFondo" loop>
+    <source src="cancion.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- 💖 PANTALLA INICIAL DE BIENVENIDA -->
+  <div class="pantalla-inicio" id="pantallaInicio">
+    <button class="btn-reproducir" onclick="iniciarExperiencia()">
+      !Click! 💕
+    </button>
+  </div>
+
   <canvas id="heartCanvas"></canvas>
   
-  <!-- 🌸 FRASE EN EL CENTRO -->
-  <div class="texto-centro" id="textoFrase">
-    Tal como los destellos, así es mi amor de infinito por ti. 
-  </div>
+  <!-- 🌸 CONTENEDOR DE VERSOS -->
+  <div class="texto-centro" id="textoFrase"></div>
 
   <script>
     const canvas = document.getElementById('heartCanvas');
     const ctx = canvas.getContext('2d');
+    const musica = document.getElementById('musicaFondo');
+    const elementoTexto = document.getElementById('textoFrase');
+
+    // ⬇️ AQUÍ PONES TUS 8 VERSOS DE LA CANCIÓN ⬇️
+    const versos = [
+      "Vamos, no me dejes, no puede ser tan fácil, babe.",
+      "Si me crees, supongo que me subiré a un avión.",
+      "Vuelo a tu ciudad emocionada por ver tu cara.",
+      "Abrázame, consuélame y luego me iré sin dejar rastro..",
+      "Vamos, no me dejes, no puede ser tan fácil, babe.",
+      "Si me crees, supongo que me subiré a un avión.",
+      "Vuelo a tu ciudad emocionada por ver tu cara.",
+      "Abrázame, consuélame y luego me iré sin dejar rastro.."
+    ];
 
     function resize() {
       canvas.width = window.innerWidth;
@@ -56,11 +124,49 @@
     window.addEventListener('resize', resize);
     resize();
 
+    function iniciarExperiencia() {
+      musica.play().catch(e => console.log("Error de reproducción", e));
+      
+      const inicio = document.getElementById('pantallaInicio');
+      inicio.style.opacity = '0';
+      setTimeout(() => {
+        inicio.style.display = 'none';
+        drawPart1();
+        reproducirVersos();
+      }, 800);
+    }
+
+    // 🕒 FUNCIÓN PARA CAMBIAR LOS VERSOS CADA 4 SEGUNDOS
+    function reproducirVersos() {
+      let indice = 0;
+
+      function mostrarSiguienteVerso() {
+        if (indice < versos.length) {
+          elementoTexto.textContent = versos[indice];
+          elementoTexto.classList.add('visible');
+
+          // Ocultar un poco antes de los 4 segundos para hacer la transición suave
+          setTimeout(() => {
+            elementoTexto.classList.remove('visible');
+          }, 3400);
+
+          indice++;
+          setTimeout(mostrarSiguienteVerso, 4000); // 4000 ms = 4 segundos por verso
+        } else {
+          // Mantener el último verso en pantalla al finalizar
+          elementoTexto.textContent = versos[versos.length - 1];
+          elementoTexto.classList.add('visible');
+        }
+      }
+
+      mostrarSiguienteVerso();
+    }
+
     // Ecuación matemática del corazón
     function heart(a, scale) {
       const x = 16 * Math.pow(Math.sin(a), 3) * scale;
       const y = (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * scale;
-      return { x, y: -y }; // Invertimos Y para el canvas
+      return { x, y: -y };
     }
 
     function random(min, max) {
@@ -78,7 +184,7 @@
       if (i1 < 10000) {
         for (let step = 0; step < 80; step++) {
           const a = random(0, 2 * Math.PI);
-          const sc = random(0.3, 11); // Escalado para celulares
+          const sc = random(0.3, 11);
           const pos = heart(a, sc);
 
           const ang = Math.atan2(pos.y, pos.x) + random(-0.5, 0.5);
@@ -139,14 +245,8 @@
           i2++;
         }
         requestAnimationFrame(drawPart2);
-      } else {
-        // Muestra la frase al terminar
-        document.getElementById('textoFrase').style.opacity = '1';
       }
     }
-
-    // Iniciar dibujo
-    drawPart1();
   </script>
 </body>
 </html>
