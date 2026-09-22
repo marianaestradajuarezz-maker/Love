@@ -88,7 +88,7 @@
 <body>
 
   <!-- 🎵 AUDIO -->
-  <audio id="musicaFondo" loop preload="auto" playsinline>
+  <audio id="musicaFondo" preload="auto" playsinline>
     <source src="cancion.mp3" type="audio/mpeg">
   </audio>
 
@@ -130,6 +130,7 @@
     resize();
 
     function iniciarExperiencia() {
+      musica.volume = 1.0; // Aseguramos volumen al 100% al arrancar
       musica.play().catch(e => console.log("Error de audio:", e));
       
       const inicio = document.getElementById('pantallaInicio');
@@ -151,7 +152,7 @@
           elementoTexto.textContent = versos[indice];
           elementoTexto.classList.add('visible');
 
-          // Transición suave ocultando antes del cambio
+          // Ocultar suavemente antes de cambiar
           setTimeout(() => {
             elementoTexto.classList.remove('visible');
           }, tiempoPorVerso - 700);
@@ -159,13 +160,29 @@
           indice++;
           setTimeout(mostrarSiguienteVerso, tiempoPorVerso);
         } else {
-          // El último verso se queda visible al finalizar el ciclo
+          // El último verso se queda visible y apagamos la música
           elementoTexto.textContent = versos[versos.length - 1];
           elementoTexto.classList.add('visible');
+          
+          // 🔇 Bajar el volumen progresivamente y apagar la canción
+          apagarMusicaSuavemente();
         }
       }
 
       mostrarSiguienteVerso();
+    }
+
+    // 🎚️ FUNCIÓN PARA BAJAR EL VOLUMEN POCO A POCO (FADE OUT DE 2.5 SEGUNDOS)
+    function apagarMusicaSuavemente() {
+      let intervaloFade = setInterval(() => {
+        if (musica.volume > 0.05) {
+          musica.volume -= 0.05; // Le baja un 5% de volumen cada 125ms
+        } else {
+          musica.volume = 0;
+          musica.pause(); // Pausa completamente la canción
+          clearInterval(intervaloFade);
+        }
+      }, 125);
     }
 
     // Ecuación matemática del corazón
@@ -181,7 +198,6 @@
 
     // 🔄 CORAZÓN QUE SE BORRA Y REINICIA EXACTAMENTE CADA 6 SEGUNDOS
     function iniciarAnimacionCorazon() {
-      // Borra el canvas cada 6000 ms (6 segundos)
       setInterval(() => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }, 6000);
