@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Love. 💕</title>
+  <title>My Love.💕</title>
   <style>
     * {
       margin: 0;
@@ -14,6 +14,7 @@
       background-color: #000;
       overflow: hidden;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
@@ -23,7 +24,7 @@
       display: block;
     }
 
-    /* 🎵 BOTÓN DE INICIO PARA ACTIVAR MÚSICA EN EL CELULAR */
+    /* 🎵 PANTALLA INICIAL PARA ACTIVAR MÚSICA */
     .pantalla-inicio {
       position: absolute;
       top: 0;
@@ -58,46 +59,50 @@
       50% { transform: scale(1.08); }
     }
 
-    /* 🌸 CONTENEDOR DE LOS VERSOS EN EL CENTRO DEL CORAZÓN */
-    .texto-centro {
+    /* 🌸 VERSOS UBICADOS ABAJO DEL CORAZÓN */
+    .texto-abajo {
       position: absolute;
+      bottom: 40px;
+      left: 0;
+      width: 100%;
       color: #ffffff;
       font-size: 1.1rem;
       font-weight: bold;
       text-align: center;
       text-shadow: 0 0 10px rgba(255, 105, 180, 0.9), 0 0 20px rgba(255, 182, 193, 0.7);
       pointer-events: none;
-      padding: 0 25px;
+      padding: 0 20px;
       line-height: 1.4;
       transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
       opacity: 0;
-      transform: scale(0.95);
+      transform: translateY(10px);
+      z-index: 10;
     }
 
-    .texto-centro.visible {
+    .texto-abajo.visible {
       opacity: 1;
-      transform: scale(1);
+      transform: translateY(0);
     }
   </style>
 </head>
 <body>
 
-  <!-- 🎵 AUDIO -->
-  <audio id="musicaFondo" loop>
+  <!-- 🎵 AUDIO CON ATRIBUTOS DE COMPATIBILIDAD -->
+  <audio id="musicaFondo" loop preload="auto" playsinline>
     <source src="cancion.mp3" type="audio/mpeg">
   </audio>
 
   <!-- 💖 PANTALLA INICIAL DE BIENVENIDA -->
   <div class="pantalla-inicio" id="pantallaInicio">
     <button class="btn-reproducir" onclick="iniciarExperiencia()">
-      !Click! 💕
+      ¡Click! 💕
     </button>
   </div>
 
   <canvas id="heartCanvas"></canvas>
   
-  <!-- 🌸 CONTENEDOR DE VERSOS -->
-  <div class="texto-centro" id="textoFrase"></div>
+  <!-- 🌸 CONTENEDOR DE VERSOS ABAJO -->
+  <div class="texto-abajo" id="textoFrase"></div>
 
   <script>
     const canvas = document.getElementById('heartCanvas');
@@ -105,7 +110,7 @@
     const musica = document.getElementById('musicaFondo');
     const elementoTexto = document.getElementById('textoFrase');
 
-    // ⬇️ AQUÍ PONES TUS 8 VERSOS DE LA CANCIÓN ⬇️
+    // ⬇️ TUS 8 VERSOS DE LA CANCIÓN ⬇️
     const versos = [
       "Vamos, no me dejes, no puede ser tan fácil, babe.",
       "Si me crees, supongo que me subiré a un avión.",
@@ -125,18 +130,23 @@
     resize();
 
     function iniciarExperiencia() {
-      musica.play().catch(e => console.log("Error de reproducción", e));
+      // Intenta reproducir el audio de forma interactiva
+      musica.play().then(() => {
+        console.log("Audio reproduciendo correctamente");
+      }).catch(e => {
+        console.log("Error de audio:", e);
+      });
       
       const inicio = document.getElementById('pantallaInicio');
       inicio.style.opacity = '0';
       setTimeout(() => {
         inicio.style.display = 'none';
-        drawPart1();
+        drawInfiniteHeart();
         reproducirVersos();
       }, 800);
     }
 
-    // 🕒 FUNCIÓN PARA CAMBIAR LOS VERSOS CADA 4 SEGUNDOS
+    // 🕒 CAMBIO DE VERSOS CADA 4 SEGUNDOS
     function reproducirVersos() {
       let indice = 0;
 
@@ -145,15 +155,14 @@
           elementoTexto.textContent = versos[indice];
           elementoTexto.classList.add('visible');
 
-          // Ocultar un poco antes de los 4 segundos para hacer la transición suave
           setTimeout(() => {
             elementoTexto.classList.remove('visible');
           }, 3400);
 
           indice++;
-          setTimeout(mostrarSiguienteVerso, 4000); // 4000 ms = 4 segundos por verso
+          setTimeout(mostrarSiguienteVerso, 4000);
         } else {
-          // Mantener el último verso en pantalla al finalizar
+          // El último verso se queda fijo en pantalla al terminar el ciclo
           elementoTexto.textContent = versos[versos.length - 1];
           elementoTexto.classList.add('visible');
         }
@@ -173,79 +182,66 @@
       return Math.random() * (max - min) + min;
     }
 
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2 - 20;
+    // ♾️ CORAZÓN INFINITO
+    function drawInfiniteHeart() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2 - 40; // Elevado para dar lugar al texto abajo
 
-    let i1 = 0;
-    let i2 = 0;
+      // Dibuja trazos densos en el interior
+      for (let step = 0; step < 25; step++) {
+        const a = random(0, 2 * Math.PI);
+        const sc = random(0.3, 11);
+        const pos = heart(a, sc);
 
-    // Animación 1: Relleno denso
-    function drawPart1() {
-      if (i1 < 10000) {
-        for (let step = 0; step < 80; step++) {
-          const a = random(0, 2 * Math.PI);
-          const sc = random(0.3, 11);
-          const pos = heart(a, sc);
+        const ang = Math.atan2(pos.y, pos.x) + random(-0.5, 0.5);
+        const length = random(4, 14);
 
-          const ang = Math.atan2(pos.y, pos.x) + random(-0.5, 0.5);
-          const length = random(4, 14);
+        const r = 255;
+        const g = Math.floor(random(60, 140));
+        const b = Math.floor(random(160, 220));
 
-          const r = 255;
-          const g = Math.floor(random(60, 140));
-          const b = Math.floor(random(160, 220));
+        ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx.lineWidth = random(0.5, 1.2);
 
-          ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-          ctx.lineWidth = random(0.5, 1.2);
+        const x1 = centerX + pos.x;
+        const y1 = centerY + pos.y;
+        const x2 = x1 + length * Math.cos(ang);
+        const y2 = y1 + length * Math.sin(ang);
 
-          const x1 = centerX + pos.x;
-          const y1 = centerY + pos.y;
-          const x2 = x1 + length * Math.cos(ang);
-          const y2 = y1 + length * Math.sin(ang);
-
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.stroke();
-
-          i1++;
-        }
-        requestAnimationFrame(drawPart1);
-      } else {
-        requestAnimationFrame(drawPart2);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
       }
-    }
 
-    // Animación 2: Destellos exteriores
-    function drawPart2() {
-      if (i2 < 3500) {
-        for (let step = 0; step < 40; step++) {
-          const a = random(0, 2 * Math.PI);
-          const pos = heart(a, 12);
+      // Dibuja destellos exteriores en el borde
+      for (let step = 0; step < 10; step++) {
+        const a = random(0, 2 * Math.PI);
+        const pos = heart(a, 12);
 
-          const ang = Math.atan2(pos.y, pos.x) + random(-0.35, 0.35);
-          const length = random(8, 25);
+        const ang = Math.atan2(pos.y, pos.x) + random(-0.35, 0.35);
+        const length = random(8, 25);
 
-          const r = 255;
-          const g = Math.floor(random(115, 190));
-          const b = Math.floor(random(190, 240));
+        const r = 255;
+        const g = Math.floor(random(115, 190));
+        const b = Math.floor(random(190, 240));
 
-          ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-          ctx.lineWidth = random(0.4, 0.9);
+        ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx.lineWidth = random(0.4, 0.9);
 
-          const x1 = centerX + pos.x + random(-2, 2);
-          const y1 = centerY + pos.y + random(-2, 2);
-          const x2 = x1 + length * Math.cos(ang);
-          const y2 = y1 + length * Math.sin(ang);
+        const x1 = centerX + pos.x + random(-2, 2);
+        const y1 = centerY + pos.y + random(-2, 2);
+        const x2 = x1 + length * Math.cos(ang);
+        const y2 = y1 + length * Math.sin(ang);
 
-          ctx.beginPath();
-          ctx.moveTo(x1, y1);
-          ctx.lineTo(x2, y2);
-          ctx.stroke();
-
-          i2++;
-        }
-        requestAnimationFrame(drawPart2);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
       }
+
+      // Animación infinita
+      requestAnimationFrame(drawInfiniteHeart);
     }
   </script>
 </body>
