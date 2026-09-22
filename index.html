@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Love.💕</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    canvas {
+      display: block;
+    }
+    .texto-centro {
+      position: absolute;
+      color: #ffffff;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(255, 105, 180, 0.8), 0 0 20px rgba(255, 182, 193, 0.6);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="heartCanvas"></canvas>
+  
+  <!-- 🌸 FRASE EN EL CENTRO -->
+  <div class="texto-centro" id="textoFrase">
+    Tal como los destellos, así es mi amor de infinito por ti. 
+  </div>
+
+  <script>
+    const canvas = document.getElementById('heartCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Ecuación matemática del corazón
+    function heart(a, scale) {
+      const x = 16 * Math.pow(Math.sin(a), 3) * scale;
+      const y = (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) * scale;
+      return { x, y: -y }; // Invertimos Y para el canvas
+    }
+
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2 - 20;
+
+    let i1 = 0;
+    let i2 = 0;
+
+    // Animación 1: Relleno denso
+    function drawPart1() {
+      if (i1 < 10000) {
+        for (let step = 0; step < 80; step++) {
+          const a = random(0, 2 * Math.PI);
+          const sc = random(0.3, 11); // Escalado para celulares
+          const pos = heart(a, sc);
+
+          const ang = Math.atan2(pos.y, pos.x) + random(-0.5, 0.5);
+          const length = random(4, 14);
+
+          const r = 255;
+          const g = Math.floor(random(60, 140));
+          const b = Math.floor(random(160, 220));
+
+          ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+          ctx.lineWidth = random(0.5, 1.2);
+
+          const x1 = centerX + pos.x;
+          const y1 = centerY + pos.y;
+          const x2 = x1 + length * Math.cos(ang);
+          const y2 = y1 + length * Math.sin(ang);
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+
+          i1++;
+        }
+        requestAnimationFrame(drawPart1);
+      } else {
+        requestAnimationFrame(drawPart2);
+      }
+    }
+
+    // Animación 2: Destellos exteriores
+    function drawPart2() {
+      if (i2 < 3500) {
+        for (let step = 0; step < 40; step++) {
+          const a = random(0, 2 * Math.PI);
+          const pos = heart(a, 12);
+
+          const ang = Math.atan2(pos.y, pos.x) + random(-0.35, 0.35);
+          const length = random(8, 25);
+
+          const r = 255;
+          const g = Math.floor(random(115, 190));
+          const b = Math.floor(random(190, 240));
+
+          ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+          ctx.lineWidth = random(0.4, 0.9);
+
+          const x1 = centerX + pos.x + random(-2, 2);
+          const y1 = centerY + pos.y + random(-2, 2);
+          const x2 = x1 + length * Math.cos(ang);
+          const y2 = y1 + length * Math.sin(ang);
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+
+          i2++;
+        }
+        requestAnimationFrame(drawPart2);
+      } else {
+        // Muestra la frase al terminar
+        document.getElementById('textoFrase').style.opacity = '1';
+      }
+    }
+
+    // Iniciar dibujo
+    drawPart1();
+  </script>
+</body>
+</html>
