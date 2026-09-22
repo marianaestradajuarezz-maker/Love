@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Love.💕</title>
+  <title>My Love. 💕</title>
   <style>
     * {
       margin: 0;
@@ -141,25 +141,25 @@
       }, 800);
     }
 
-    // 🕒 REPRODUCCIÓN DE VERSOS EN 32.7 SEGUNDOS TOTALES (~4087 ms por verso)
+    // 🕒 REPRODUCCIÓN DE VERSOS EN 40.9 SEGUNDOS TOTALES (~5112 ms por verso)
     function reproducirVersos() {
       let indice = 0;
-      const tiempoPorVerso = 32700 / versos.length; // 4087.5 ms por verso
+      const tiempoPorVerso = 40900 / versos.length; // 5112.5 ms por verso
 
       function mostrarSiguienteVerso() {
         if (indice < versos.length) {
           elementoTexto.textContent = versos[indice];
           elementoTexto.classList.add('visible');
 
-          // Ocultar un poco antes de cambiar de verso para un fundido suave
+          // Transición suave ocultando antes del cambio
           setTimeout(() => {
             elementoTexto.classList.remove('visible');
-          }, tiempoPorVerso - 600);
+          }, tiempoPorVerso - 700);
 
           indice++;
           setTimeout(mostrarSiguienteVerso, tiempoPorVerso);
         } else {
-          // Mantener el último verso visible en pantalla al terminar
+          // El último verso se queda visible al finalizar el ciclo
           elementoTexto.textContent = versos[versos.length - 1];
           elementoTexto.classList.add('visible');
         }
@@ -179,26 +179,19 @@
       return Math.random() * (max - min) + min;
     }
 
-    // 🔄 CORAZÓN QUE SE REINICIA CADA 6 SEGUNDOS
-    let animId = null;
-
+    // 🔄 CORAZÓN QUE SE BORRA Y REINICIA EXACTAMENTE CADA 6 SEGUNDOS
     function iniciarAnimacionCorazon() {
-      let tiempoInicio = Date.now();
+      // Borra el canvas cada 6000 ms (6 segundos)
+      setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }, 6000);
 
       function dibujaPaso() {
-        const tiempoTranscurrido = Date.now() - tiempoInicio;
-
-        // Si pasaron 6000 ms (6 segundos), limpia la pantalla y reinicia el ciclo
-        if (tiempoTranscurrido >= 6000) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          tiempoInicio = Date.now();
-        }
-
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2 - 40;
 
-        // Dibujar relleno
-        for (let step = 0; step < 20; step++) {
+        // Relleno denso
+        for (let step = 0; step < 18; step++) {
           const a = random(0, 2 * Math.PI);
           const sc = random(0.3, 11);
           const pos = heart(a, sc);
@@ -224,8 +217,8 @@
           ctx.stroke();
         }
 
-        // Dibujar destellos
-        for (let step = 0; step < 8; step++) {
+        // Destellos exteriores
+        for (let step = 0; step < 6; step++) {
           const a = random(0, 2 * Math.PI);
           const pos = heart(a, 12);
 
@@ -250,7 +243,7 @@
           ctx.stroke();
         }
 
-        animId = requestAnimationFrame(dibujaPaso);
+        requestAnimationFrame(dibujaPaso);
       }
 
       dibujaPaso();
