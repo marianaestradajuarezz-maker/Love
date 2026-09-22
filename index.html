@@ -73,7 +73,7 @@
       pointer-events: none;
       padding: 0 20px;
       line-height: 1.4;
-      transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
       opacity: 0;
       transform: translateY(10px);
       z-index: 10;
@@ -87,7 +87,7 @@
 </head>
 <body>
 
-  <!-- 🎵 AUDIO CON ATRIBUTOS DE COMPATIBILIDAD -->
+  <!-- 🎵 AUDIO -->
   <audio id="musicaFondo" loop preload="auto" playsinline>
     <source src="cancion.mp3" type="audio/mpeg">
   </audio>
@@ -110,7 +110,7 @@
     const musica = document.getElementById('musicaFondo');
     const elementoTexto = document.getElementById('textoFrase');
 
-    // ⬇️ TUS 8 VERSOS DE LA CANCIÓN ⬇️
+    // TUS 8 VERSOS DE LA CANCIÓN
     const versos = [
       "Vamos, no me dejes, no puede ser tan fácil, babe.",
       "Si me crees, supongo que me subiré a un avión.",
@@ -130,39 +130,36 @@
     resize();
 
     function iniciarExperiencia() {
-      // Intenta reproducir el audio de forma interactiva
-      musica.play().then(() => {
-        console.log("Audio reproduciendo correctamente");
-      }).catch(e => {
-        console.log("Error de audio:", e);
-      });
+      musica.play().catch(e => console.log("Error de audio:", e));
       
       const inicio = document.getElementById('pantallaInicio');
       inicio.style.opacity = '0';
       setTimeout(() => {
         inicio.style.display = 'none';
-        drawInfiniteHeart();
+        iniciarAnimacionCorazon();
         reproducirVersos();
       }, 800);
     }
 
-    // 🕒 CAMBIO DE VERSOS CADA 4 SEGUNDOS
+    // 🕒 REPRODUCCIÓN DE VERSOS EN 32.7 SEGUNDOS TOTALES (~4087 ms por verso)
     function reproducirVersos() {
       let indice = 0;
+      const tiempoPorVerso = 32700 / versos.length; // 4087.5 ms por verso
 
       function mostrarSiguienteVerso() {
         if (indice < versos.length) {
           elementoTexto.textContent = versos[indice];
           elementoTexto.classList.add('visible');
 
+          // Ocultar un poco antes de cambiar de verso para un fundido suave
           setTimeout(() => {
             elementoTexto.classList.remove('visible');
-          }, 3400);
+          }, tiempoPorVerso - 600);
 
           indice++;
-          setTimeout(mostrarSiguienteVerso, 5000);
+          setTimeout(mostrarSiguienteVerso, tiempoPorVerso);
         } else {
-          // El último verso se queda fijo en pantalla al terminar el ciclo
+          // Mantener el último verso visible en pantalla al terminar
           elementoTexto.textContent = versos[versos.length - 1];
           elementoTexto.classList.add('visible');
         }
@@ -182,66 +179,81 @@
       return Math.random() * (max - min) + min;
     }
 
-    // ♾️ CORAZÓN INFINITO
-    function drawInfiniteHeart() {
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2 - 40; // Elevado para dar lugar al texto abajo
+    // 🔄 CORAZÓN QUE SE REINICIA CADA 6 SEGUNDOS
+    let animId = null;
 
-      // Dibuja trazos densos en el interior
-      for (let step = 0; step < 25; step++) {
-        const a = random(0, 2 * Math.PI);
-        const sc = random(0.3, 11);
-        const pos = heart(a, sc);
+    function iniciarAnimacionCorazon() {
+      let tiempoInicio = Date.now();
 
-        const ang = Math.atan2(pos.y, pos.x) + random(-0.5, 0.5);
-        const length = random(4, 14);
+      function dibujaPaso() {
+        const tiempoTranscurrido = Date.now() - tiempoInicio;
 
-        const r = 255;
-        const g = Math.floor(random(60, 140));
-        const b = Math.floor(random(160, 220));
+        // Si pasaron 6000 ms (6 segundos), limpia la pantalla y reinicia el ciclo
+        if (tiempoTranscurrido >= 6000) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          tiempoInicio = Date.now();
+        }
 
-        ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-        ctx.lineWidth = random(0.5, 1.2);
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2 - 40;
 
-        const x1 = centerX + pos.x;
-        const y1 = centerY + pos.y;
-        const x2 = x1 + length * Math.cos(ang);
-        const y2 = y1 + length * Math.sin(ang);
+        // Dibujar relleno
+        for (let step = 0; step < 20; step++) {
+          const a = random(0, 2 * Math.PI);
+          const sc = random(0.3, 11);
+          const pos = heart(a, sc);
 
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+          const ang = Math.atan2(pos.y, pos.x) + random(-0.5, 0.5);
+          const length = random(4, 14);
+
+          const r = 255;
+          const g = Math.floor(random(60, 140));
+          const b = Math.floor(random(160, 220));
+
+          ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+          ctx.lineWidth = random(0.5, 1.2);
+
+          const x1 = centerX + pos.x;
+          const y1 = centerY + pos.y;
+          const x2 = x1 + length * Math.cos(ang);
+          const y2 = y1 + length * Math.sin(ang);
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+
+        // Dibujar destellos
+        for (let step = 0; step < 8; step++) {
+          const a = random(0, 2 * Math.PI);
+          const pos = heart(a, 12);
+
+          const ang = Math.atan2(pos.y, pos.x) + random(-0.35, 0.35);
+          const length = random(8, 25);
+
+          const r = 255;
+          const g = Math.floor(random(115, 190));
+          const b = Math.floor(random(190, 240));
+
+          ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+          ctx.lineWidth = random(0.4, 0.9);
+
+          const x1 = centerX + pos.x + random(-2, 2);
+          const y1 = centerY + pos.y + random(-2, 2);
+          const x2 = x1 + length * Math.cos(ang);
+          const y2 = y1 + length * Math.sin(ang);
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+
+        animId = requestAnimationFrame(dibujaPaso);
       }
 
-      // Dibuja destellos exteriores en el borde
-      for (let step = 0; step < 10; step++) {
-        const a = random(0, 2 * Math.PI);
-        const pos = heart(a, 12);
-
-        const ang = Math.atan2(pos.y, pos.x) + random(-0.35, 0.35);
-        const length = random(8, 25);
-
-        const r = 255;
-        const g = Math.floor(random(115, 190));
-        const b = Math.floor(random(190, 240));
-
-        ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
-        ctx.lineWidth = random(0.4, 0.9);
-
-        const x1 = centerX + pos.x + random(-2, 2);
-        const y1 = centerY + pos.y + random(-2, 2);
-        const x2 = x1 + length * Math.cos(ang);
-        const y2 = y1 + length * Math.sin(ang);
-
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      }
-
-      // Animación infinita
-      requestAnimationFrame(drawInfiniteHeart);
+      dibujaPaso();
     }
   </script>
 </body>
